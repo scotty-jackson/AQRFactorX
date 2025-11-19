@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.api import factors, analytics
+from backend.api import factors, analytics, advanced_analytics, export, monitoring
 
 # Create FastAPI app
 app = FastAPI(
@@ -30,6 +30,9 @@ app.add_middleware(
 # Include routers
 app.include_router(factors.router)
 app.include_router(analytics.router)
+app.include_router(advanced_analytics.router)
+app.include_router(export.router)
+app.include_router(monitoring.router)
 
 
 @app.get("/")

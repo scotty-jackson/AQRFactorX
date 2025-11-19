@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: aqr_postgres
+    environment:
+      POSTGRES_DB: aqr_factors
+      POSTGRES_USER: aqr_user
+      POSTGRES_PASSWORD: aqr_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/alembic:/app/alembic
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aqr_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aqr_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aqr_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - aqr_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aqr_backend
+    environment:
+      DATABASE_URL: postgresql://aqr_user:aqr_password@postgres:5432/aqr_factors
+      REDIS_URL: redis://redis:6379/0
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    networks:
+      - aqr_network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aqr_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - aqr_network
+
+volumes:
+  postgres_data:
+
+networks:
+  aqr_network:
+    driver: bridge
