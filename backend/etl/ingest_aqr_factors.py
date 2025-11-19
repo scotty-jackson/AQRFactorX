@@ -120,32 +120,48 @@ REGION_MAPPING = {
 }
 
 
-def parse_aqr_csv(file_path: Path) -> Tuple[pd.DataFrame, Dict]:
+def parse_aqr_file(file_path: Path, sheet_name: Optional[str] = None) -> Tuple[pd.DataFrame, Dict]:
     """
-    Parse an AQR CSV file and extract returns data and metadata
+    Parse an AQR data file (CSV or Excel) and extract returns data and metadata
 
     Returns:
         Tuple of (DataFrame with date and return columns, metadata dict)
     """
-    logger.info(f"Parsing file: {file_path.name}")
+    logger.info(f"Parsing file: {file_path.name}" + (f" (sheet: {sheet_name})" if sheet_name else ""))
 
-    # Read the CSV file - AQR files typically have metadata rows at the top
-    # We'll read the file in chunks to identify the header row
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
+    # Determine file type and read accordingly
+    if file_path.suffix.lower() in ['.xlsx', '.xls']:
+        # Read Excel file
+        try:
+            if sheet_name:
+                df = pd.read_excel(file_path, sheet_name=sheet_name)
+            else:
+                # Read first sheet by default
+                df = pd.read_excel(file_path, sheet_name=0)
+        except Exception as e:
+            logger.error(f"Error reading Excel file {file_path.name}: {str(e)}")
+            raise
 
-    # Find the header row (usually contains 'DATE' or 'date')
-    header_row = 0
-    for i, line in enumerate(lines[:20]):  # Check first 20 lines
-        if 'DATE' in line.upper() or 'Date' in line:
-            header_row = i
-            break
+    elif file_path.suffix.lower() == '.csv':
+        # Read CSV file - AQR files typically have metadata rows at the top
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
 
-    # Read the CSV starting from the header row
-    df = pd.read_csv(file_path, skiprows=header_row)
+        # Find the header row (usually contains 'DATE' or 'date')
+        header_row = 0
+        for i, line in enumerate(lines[:20]):  # Check first 20 lines
+            if 'DATE' in line.upper() or 'Date' in line:
+                header_row = i
+                break
 
-    # Extract metadata from filename
+        df = pd.read_csv(file_path, skiprows=header_row)
+    else:
+        raise ValueError(f"Unsupported file format: {file_path.suffix}")
+
+    # Extract metadata from filename (and sheet name if applicable)
     filename = file_path.stem.lower()
+    if sheet_name:
+        filename = f"{filename}_{sheet_name.lower()}"
     metadata = extract_metadata_from_filename(filename)
 
     # Clean up the dataframe
@@ -325,14 +341,14 @@ def get_or_create_factor_group(db: Session, group_name: str) -> FactorGroup:
 
 def ingest_factor_file(db: Session, file_path: Path) -> int:
     """
-    Ingest a single AQR factor file
+    Ingest a single AQR factor file (CSV or Excel)
 
     Returns:
         Number of factors ingested from this file
     """
     try:
-        # Parse the CSV file
-        df, base_metadata = parse_aqr_csv(file_path)
+        # Parse the file
+        df, base_metadata = parse_aqr_file(file_path)
 
         if df.empty:
             logger.warning(f"No data found in {file_path.name}")
@@ -487,26 +503,29 @@ def ingest_directory(data_dir: str):
         logger.error(f"Not a directory: {data_dir}")
         return
 
-    # Find all CSV files
-    csv_files = list(data_path.glob("*.csv"))
+    # Find all data files (CSV and Excel) - search recursively
+    csv_files = list(data_path.glob("**/*.csv"))
+    excel_files = list(data_path.glob("**/*.xlsx")) + list(data_path.glob("**/*.xls"))
 
-    if not csv_files:
-        logger.warning(f"No CSV files found in {data_dir}")
+    all_files = csv_files + excel_files
+
+    if not all_files:
+        logger.warning(f"No data files found in {data_dir}")
         return
 
-    logger.info(f"Found {len(csv_files)} CSV files to process")
+    logger.info(f"Found {len(all_files)} data files to process ({len(csv_files)} CSV, {len(excel_files)} Excel)")
 
     db = SessionLocal()
 
     try:
         total_factors = 0
 
-        for csv_file in csv_files:
+        for data_file in all_files:
             logger.info(f"\n{'='*60}")
-            logger.info(f"Processing file: {csv_file.name}")
+            logger.info(f"Processing file: {data_file.name}")
             logger.info(f"{'='*60}")
 
-            factors_count = ingest_factor_file(db, csv_file)
+            factors_count = ingest_factor_file(db, data_file)
             total_factors += factors_count
 
         logger.info(f"\n{'='*60}")

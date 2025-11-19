@@ -11,6 +11,7 @@ alembic==1.13.1
 # Data processing
 pandas==2.2.0
 numpy==1.26.3
+openpyxl==3.1.2
 
 # Environment variables
 python-dotenv==1.0.0
