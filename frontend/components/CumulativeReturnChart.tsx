@@ -16,7 +16,7 @@ import { formatPercent, formatDate } from '@/lib/utils';
 
 interface DataPoint {
   date: string;
-  [key: string]: number | string;
+  [key: string]: number | string | null | undefined;
 }
 
 interface CumulativeReturnChartProps {

@@ -14,36 +14,36 @@ export default function FactorCard({ factor }: FactorCardProps) {
   return (
     <Link href={`/factor/${factor.id}`}>
       <div className="bg-white p-5 rounded-lg shadow hover:shadow-lg transition-shadow border border-gray-200 cursor-pointer">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <h3 className="font-semibold text-lg text-gray-900">{factor.name}</h3>
-            <p className="text-sm text-gray-500 font-mono">{factor.code}</p>
+        <div className="flex justify-between items-start gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-lg text-gray-900 break-words line-clamp-2">{factor.name}</h3>
+            <p className="text-sm text-gray-500 font-mono truncate">{factor.code}</p>
           </div>
-          <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded">
+          <span className="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded whitespace-nowrap flex-shrink-0">
             {factor.region || 'N/A'}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div>
+          <div title="Annualized Return: Average yearly return of the factor">
             <p className="text-xs text-gray-500">Ann. Return</p>
             <p className={`text-sm font-semibold ${getValueColor(factor.annualized_return)}`}>
               {formatPercent(factor.annualized_return)}
             </p>
           </div>
-          <div>
+          <div title="Volatility: Standard deviation of returns, measuring risk">
             <p className="text-xs text-gray-500">Volatility</p>
             <p className="text-sm font-semibold text-gray-700">
               {formatPercent(factor.annualized_volatility)}
             </p>
           </div>
-          <div>
+          <div title="Sharpe Ratio: Risk-adjusted return (return per unit of risk)">
             <p className="text-xs text-gray-500">Sharpe Ratio</p>
             <p className="text-sm font-semibold text-gray-700">
               {factor.sharpe_ratio?.toFixed(2) || 'N/A'}
             </p>
           </div>
-          <div>
+          <div title="Maximum Drawdown: Largest peak-to-trough decline">
             <p className="text-xs text-gray-500">Max DD</p>
             <p className="text-sm font-semibold text-finance-negative">
               {formatPercent(factor.max_drawdown)}

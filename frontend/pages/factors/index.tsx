@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import FactorCard from '@/components/FactorCard';
+import FactorCardSkeleton from '@/components/FactorCardSkeleton';
 import { factorApi, metadataApi } from '@/lib/api';
 import type { Factor } from '@/types';
 import { formatPercent, getValueColor } from '@/lib/utils';
@@ -13,6 +14,7 @@ export default function FactorsPage() {
   const router = useRouter();
   const [factors, setFactors] = useState<Factor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Filters
@@ -55,12 +57,14 @@ export default function FactorsPage() {
       setAssetClasses(assetClassesData);
     } catch (error) {
       console.error('Error loading metadata:', error);
+      // Metadata errors are non-critical, continue with empty arrays
     }
   };
 
   const loadFactors = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       const params: any = { limit: 100 };
 
@@ -70,9 +74,17 @@ export default function FactorsPage() {
       if (selectedAssetClass) params.asset_class = selectedAssetClass;
 
       const data = await factorApi.list(params);
+
+      // Validate response is an array
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid response format from API');
+      }
+
       setFactors(data);
     } catch (error) {
       console.error('Error loading factors:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load factors. Please try again.');
+      setFactors([]);
     } finally {
       setLoading(false);
     }
@@ -83,6 +95,7 @@ export default function FactorsPage() {
     setSelectedRegion('');
     setSelectedFrequency('');
     setSelectedAssetClass('');
+    setError(null);
   };
 
   const activeFiltersCount = [
@@ -193,21 +206,19 @@ export default function FactorsPage() {
         </p>
         <div className="flex gap-2">
           <button
-            className={`px-4 py-2 rounded-md font-medium ${
-              viewMode === 'grid'
+            className={`px-4 py-2 rounded-md font-medium ${viewMode === 'grid'
                 ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
             onClick={() => setViewMode('grid')}
           >
             Grid
           </button>
           <button
-            className={`px-4 py-2 rounded-md font-medium ${
-              viewMode === 'table'
+            className={`px-4 py-2 rounded-md font-medium ${viewMode === 'table'
                 ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
             onClick={() => setViewMode('table')}
           >
             Table
@@ -217,9 +228,26 @@ export default function FactorsPage() {
 
       {/* Results */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-600">Loading factors...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <FactorCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+          <div className="text-red-600 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Factors</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => loadFactors()}
+            className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+          >
+            Try Again
+          </button>
         </div>
       ) : factors.length > 0 ? (
         viewMode === 'grid' ? (
@@ -295,15 +323,27 @@ export default function FactorsPage() {
         )
       ) : (
         <div className="bg-white rounded-lg shadow p-12 text-center">
-          <p className="text-gray-600 text-lg">
-            No factors found matching your criteria.
+          <div className="text-gray-400 mb-4">
+            <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No factors found
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {activeFiltersCount > 0
+              ? 'Try adjusting your filters to see more results.'
+              : 'No factors available in the database.'}
           </p>
-          <button
-            onClick={clearFilters}
-            className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-          >
-            Clear Filters
-          </button>
+          {activeFiltersCount > 0 && (
+            <button
+              onClick={clearFilters}
+              className="px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+            >
+              Clear All Filters
+            </button>
+          )}
         </div>
       )}
     </Layout>

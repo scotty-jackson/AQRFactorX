@@ -275,9 +275,15 @@ def optimize_portfolio(
     )
 
 
+from fastapi import Body
+
+class PortfolioWeightItem(BaseModel):
+    factor_id: int
+    weight: float
+
 @router.post("/performance-attribution", response_model=PerformanceAttributionResponse)
 def performance_attribution(
-    portfolio_weights: List[dict] = Query(..., description="List of {factor_id: int, weight: float}"),
+    portfolio_weights: List[PortfolioWeightItem] = Body(..., description="List of {factor_id: int, weight: float}"),
     start_date: date = Query(..., description="Start date"),
     end_date: date = Query(..., description="End date"),
     db: Session = Depends(get_db)
@@ -288,7 +294,7 @@ def performance_attribution(
     Shows how much each factor contributed to total portfolio return
     """
     # Parse weights
-    weights_dict = {w['factor_id']: w['weight'] for w in portfolio_weights}
+    weights_dict = {w.factor_id: w.weight for w in portfolio_weights}
     factor_ids = list(weights_dict.keys())
 
     # Get factors

@@ -40,6 +40,36 @@ logger = logging.getLogger(__name__)
 # Factor metadata mapping for known AQR datasets
 # This maps file patterns to factor metadata
 FACTOR_METADATA = {
+    'quality-minus-junk': {
+        'name': 'Quality Minus Junk',
+        'group': 'Quality',
+        'asset_class': 'Equity',
+        'description': 'Long high-quality stocks and short low-quality (junk) stocks'
+    },
+    'betting-against-beta': {
+        'name': 'Betting Against Beta',
+        'group': 'Low Risk',
+        'asset_class': 'Equity',
+        'description': 'Long low-beta stocks and short high-beta stocks'
+    },
+    'value-and-momentum-everywhere': {
+        'name': 'Value and Momentum Everywhere',
+        'group': 'Multi-Factor',
+        'asset_class': 'Multi-Asset',
+        'description': 'Combined value and momentum across stocks, bonds, commodities, and currencies'
+    },
+    'momentum-indices': {
+        'name': 'Momentum',
+        'group': 'Momentum',
+        'asset_class': 'Equity',
+        'description': 'Long past winners and short past losers'
+    },
+    'hml-devil': {
+        'name': 'HML Devil',
+        'group': 'Value',
+        'asset_class': 'Equity',
+        'description': 'Value factor with improvements addressing the "Devil in HML\'s Details"'
+    },
     'qmj': {
         'name': 'Quality Minus Junk',
         'group': 'Quality',
@@ -119,6 +149,26 @@ REGION_MAPPING = {
     'dev_ex_us': 'Developed ex US',
 }
 
+# Specific column name mapping for factors that use codes
+COLUMN_MAPPING = {
+    # VME Factors
+    'VAL': 'Value',
+    'MOM': 'Momentum',
+    'VAL_EQ': 'Value - Equity',
+    'MOM_EQ': 'Momentum - Equity',
+    'VAL_FI': 'Value - Fixed Income',
+    'MOM_FI': 'Momentum - Fixed Income',
+    'VAL_FX': 'Value - Currencies',
+    'MOM_FX': 'Momentum - Currencies',
+    'VAL_CM': 'Value - Commodities',
+    'MOM_CM': 'Momentum - Commodities',
+    # BAB Factors
+    'BAB_EQ': 'Betting Against Beta - Equity',
+    'BAB_FI': 'Betting Against Beta - Fixed Income',
+    'BAB_FX': 'Betting Against Beta - Currencies',
+    'BAB_CM': 'Betting Against Beta - Commodities',
+}
+
 
 def parse_aqr_file(file_path: Path, sheet_name: Optional[str] = None) -> Tuple[pd.DataFrame, Dict]:
     """
@@ -133,11 +183,29 @@ def parse_aqr_file(file_path: Path, sheet_name: Optional[str] = None) -> Tuple[p
     if file_path.suffix.lower() in ['.xlsx', '.xls']:
         # Read Excel file
         try:
+            # First read a small chunk to find the header
             if sheet_name:
-                df = pd.read_excel(file_path, sheet_name=sheet_name)
+                df_preview = pd.read_excel(file_path, sheet_name=sheet_name, nrows=20, header=None)
             else:
-                # Read first sheet by default
-                df = pd.read_excel(file_path, sheet_name=0)
+                df_preview = pd.read_excel(file_path, sheet_name=0, nrows=20, header=None)
+            
+            # Find header row
+            header_row = 0
+            for i, row in df_preview.iterrows():
+                row_str = row.astype(str).str.upper()
+                if row_str.str.contains('DATE').any() or row_str.str.contains('YEAR').any():
+                    header_row = i
+                    break
+            
+            # Read full file with correct header
+            if sheet_name:
+                df = pd.read_excel(file_path, sheet_name=sheet_name, header=header_row)
+            else:
+                df = pd.read_excel(file_path, sheet_name=0, header=header_row)
+                
+            # If the column names are not strings (e.g. dates), convert them
+            df.columns = df.columns.astype(str)
+            
         except Exception as e:
             logger.error(f"Error reading Excel file {file_path.name}: {str(e)}")
             raise
@@ -375,8 +443,65 @@ def ingest_factor_file(db: Session, file_path: Path) -> int:
                     break
 
             # Set factor name
-            if return_col.strip() and return_col.upper() != return_col:
-                metadata['name'] = f"{metadata['name']} - {return_col}"
+            # Use metadata name if available, otherwise clean up filename
+            clean_name = metadata['name']
+            
+            # If metadata name is just the filename (default), clean it up
+            if clean_name == file_path.stem.upper():
+                clean_name = file_path.stem.replace('_', ' ').replace('-', ' ').title()
+                # Remove common suffixes
+                for suffix in [' Original Paper Data', ' Monthly', ' Daily', ' Factors', ' Portfolios']:
+                    clean_name = clean_name.replace(suffix, '')
+            
+            # Determine suffix to append (Region or specific variant)
+            suffix_to_append = ""
+            
+            # Check if column name contains region info that isn't in the main name
+            col_lower = return_col.lower()
+            col_upper = return_col.upper()
+            
+            # Priority 1: Check explicit column mapping
+            if col_upper in COLUMN_MAPPING:
+                metadata['name'] = COLUMN_MAPPING[col_upper]
+                # If region is known and not in the mapped name, append it
+                if 'region' in metadata and metadata['region'] not in ['Global', 'US'] and metadata['region'] not in metadata['name']:
+                     metadata['name'] += f" - {metadata['region']}"
+            else:
+                # Priority 2: Standard logic
+                
+                # If we have a region detected and it's not Global/US (unless explicitly needed), append it
+                # Or if the column name is significantly different from the factor name
+                
+                # Common abbreviations to ignore if they match the factor name
+                abbreviations = {
+                    'qmj': 'Quality Minus Junk',
+                    'bab': 'Betting Against Beta',
+                    'vme': 'Value and Momentum Everywhere',
+                    'mom': 'Momentum',
+                    'hml': 'HML Devil',
+                    'mkt': 'Market',
+                    'smb': 'Small Minus Big'
+                }
+                
+                is_abbreviation = False
+                for abbr, full_name in abbreviations.items():
+                    if abbr in col_lower and full_name.lower() in clean_name.lower():
+                        is_abbreviation = True
+                        break
+                
+                if not is_abbreviation and return_col.lower() not in ['return', 'ret', 'mkt-rf']:
+                    # If column matches region, use the nice region name
+                    if 'region' in metadata and metadata['region'] != 'Global' and metadata['region'] != 'US':
+                         suffix_to_append = f" - {metadata['region']}"
+                    elif metadata.get('region') == 'US' and 'US' not in clean_name:
+                         suffix_to_append = " - US"
+                    elif metadata.get('region') == 'Global' and 'Global' not in clean_name:
+                         suffix_to_append = " - Global"
+                    elif return_col.upper() != clean_name.upper() and return_col.lower() not in clean_name.lower():
+                         # Fallback to column name if it's distinct
+                         suffix_to_append = f" - {return_col}"
+
+                metadata['name'] = f"{clean_name}{suffix_to_append}"
 
             # Get or create factor group
             group = get_or_create_factor_group(db, metadata['group'])

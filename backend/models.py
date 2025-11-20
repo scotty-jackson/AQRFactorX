@@ -13,7 +13,7 @@ class FactorGroup(Base):
     """Factor group/category (Value, Momentum, Quality, etc.)"""
     __tablename__ = "factor_group"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     code = Column(String(50), unique=True, nullable=False, index=True)
     name = Column(String(200), nullable=False)
     description = Column(Text)
@@ -27,7 +27,7 @@ class Factor(Base):
     """Factor metadata and descriptive information"""
     __tablename__ = "factor"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     code = Column(String(100), unique=True, nullable=False, index=True)
     name = Column(String(200), nullable=False, index=True)
     provider = Column(String(100), default="AQR", nullable=False)
@@ -63,7 +63,7 @@ class FactorReturn(Base):
     """Time series of factor returns"""
     __tablename__ = "factor_return"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     factor_id = Column(Integer, ForeignKey("factor.id", ondelete="CASCADE"), nullable=False, index=True)
     date = Column(Date, nullable=False, index=True)
     return_value = Column(Float, nullable=False)  # Returns in decimal form (e.g., 0.05 = 5%)

@@ -1,0 +1,84 @@
+2025-11-19 13:46:23,458 - __main__ - INFO - Found 13 data files to process (0 CSV, 13 Excel)
+2025-11-19 13:46:23,458 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:23,458 - __main__ - INFO - Processing file: Betting-Against-Beta-Equity-Factors-Daily.xlsx
+2025-11-19 13:46:23,458 - __main__ - INFO - ============================================================
+2025-11-19 13:46:23,458 - __main__ - INFO - Parsing file: Betting-Against-Beta-Equity-Factors-Daily.xlsx
+2025-11-19 13:46:24,733 - __main__ - ERROR - Error ingesting file Betting-Against-Beta-Equity-Factors-Daily.xlsx: Could not find date column in CSV
+2025-11-19 13:46:24,734 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:24,734 - __main__ - INFO - Processing file: Betting-Against-Beta-Equity-Factors-Monthly.xlsx
+2025-11-19 13:46:24,734 - __main__ - INFO - ============================================================
+2025-11-19 13:46:24,734 - __main__ - INFO - Parsing file: Betting-Against-Beta-Equity-Factors-Monthly.xlsx
+2025-11-19 13:46:25,036 - __main__ - ERROR - Error ingesting file Betting-Against-Beta-Equity-Factors-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:25,036 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:25,036 - __main__ - INFO - Processing file: Betting-Against-Beta-Original-Paper-Data.xlsx
+2025-11-19 13:46:25,036 - __main__ - INFO - ============================================================
+2025-11-19 13:46:25,036 - __main__ - INFO - Parsing file: Betting-Against-Beta-Original-Paper-Data.xlsx
+2025-11-19 13:46:25,110 - __main__ - ERROR - Error ingesting file Betting-Against-Beta-Original-Paper-Data.xlsx: Could not find date column in CSV
+2025-11-19 13:46:25,110 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:25,110 - __main__ - INFO - Processing file: The-Devil-in-HMLs-Details-Factors-Daily.xlsx
+2025-11-19 13:46:25,110 - __main__ - INFO - ============================================================
+2025-11-19 13:46:25,110 - __main__ - INFO - Parsing file: The-Devil-in-HMLs-Details-Factors-Daily.xlsx
+2025-11-19 13:46:26,256 - __main__ - ERROR - Error ingesting file The-Devil-in-HMLs-Details-Factors-Daily.xlsx: Could not find date column in CSV
+2025-11-19 13:46:26,258 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:26,258 - __main__ - INFO - Processing file: The-Devil-in-HMLs-Details-Factors-Monthly.xlsx
+2025-11-19 13:46:26,258 - __main__ - INFO - ============================================================
+2025-11-19 13:46:26,258 - __main__ - INFO - Parsing file: The-Devil-in-HMLs-Details-Factors-Monthly.xlsx
+2025-11-19 13:46:26,362 - __main__ - ERROR - Error ingesting file The-Devil-in-HMLs-Details-Factors-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:26,362 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:26,362 - __main__ - INFO - Processing file: Momentum-Indices-Monthly.xlsx
+2025-11-19 13:46:26,362 - __main__ - INFO - ============================================================
+2025-11-19 13:46:26,362 - __main__ - INFO - Parsing file: Momentum-Indices-Monthly.xlsx
+2025-11-19 13:46:26,374 - __main__ - ERROR - Error ingesting file Momentum-Indices-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:26,374 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:26,374 - __main__ - INFO - Processing file: Quality-Minus-Junk-10-QualitySorted-Portfolios-Monthly.xlsx
+2025-11-19 13:46:26,374 - __main__ - INFO - ============================================================
+2025-11-19 13:46:26,374 - __main__ - INFO - Parsing file: Quality-Minus-Junk-10-QualitySorted-Portfolios-Monthly.xlsx
+2025-11-19 13:46:26,472 - __main__ - ERROR - Error ingesting file Quality-Minus-Junk-10-QualitySorted-Portfolios-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:26,472 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:26,472 - __main__ - INFO - Processing file: Quality-Minus-Junk-Factors-Daily.xlsx
+2025-11-19 13:46:26,472 - __main__ - INFO - ============================================================
+2025-11-19 13:46:26,472 - __main__ - INFO - Parsing file: Quality-Minus-Junk-Factors-Daily.xlsx
+2025-11-19 13:46:28,281 - __main__ - ERROR - Error ingesting file Quality-Minus-Junk-Factors-Daily.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,282 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,282 - __main__ - INFO - Processing file: Quality-Minus-Junk-Factors-Monthly.xlsx
+2025-11-19 13:46:28,282 - __main__ - INFO - ============================================================
+2025-11-19 13:46:28,282 - __main__ - INFO - Parsing file: Quality-Minus-Junk-Factors-Monthly.xlsx
+2025-11-19 13:46:28,434 - __main__ - ERROR - Error ingesting file Quality-Minus-Junk-Factors-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,434 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,434 - __main__ - INFO - Processing file: Quality-Minus-Junk-Six-Portfolios-Formed-on-Size-and-Quality-Monthly.xlsx
+2025-11-19 13:46:28,434 - __main__ - INFO - ============================================================
+2025-11-19 13:46:28,434 - __main__ - INFO - Parsing file: Quality-Minus-Junk-Six-Portfolios-Formed-on-Size-and-Quality-Monthly.xlsx
+2025-11-19 13:46:28,501 - __main__ - ERROR - Error ingesting file Quality-Minus-Junk-Six-Portfolios-Formed-on-Size-and-Quality-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,501 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,501 - __main__ - INFO - Processing file: Value-and-Momentum-Everywhere-Factors-Monthly.xlsx
+2025-11-19 13:46:28,501 - __main__ - INFO - ============================================================
+2025-11-19 13:46:28,501 - __main__ - INFO - Parsing file: Value-and-Momentum-Everywhere-Factors-Monthly.xlsx
+2025-11-19 13:46:28,567 - __main__ - ERROR - Error ingesting file Value-and-Momentum-Everywhere-Factors-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,567 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,567 - __main__ - INFO - Processing file: Value-and-Momentum-Everywhere-Original-Paper-Data.xlsx
+2025-11-19 13:46:28,567 - __main__ - INFO - ============================================================
+2025-11-19 13:46:28,567 - __main__ - INFO - Parsing file: Value-and-Momentum-Everywhere-Original-Paper-Data.xlsx
+2025-11-19 13:46:28,640 - __main__ - ERROR - Error ingesting file Value-and-Momentum-Everywhere-Original-Paper-Data.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,640 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,640 - __main__ - INFO - Processing file: Value-and-Momentum-Everywhere-Portfolios-Monthly.xlsx
+2025-11-19 13:46:28,640 - __main__ - INFO - ============================================================
+2025-11-19 13:46:28,640 - __main__ - INFO - Parsing file: Value-and-Momentum-Everywhere-Portfolios-Monthly.xlsx
+2025-11-19 13:46:28,779 - __main__ - ERROR - Error ingesting file Value-and-Momentum-Everywhere-Portfolios-Monthly.xlsx: Could not find date column in CSV
+2025-11-19 13:46:28,779 - __main__ - INFO - 
+============================================================
+2025-11-19 13:46:28,779 - __main__ - INFO - Ingestion complete!
+2025-11-19 13:46:28,779 - __main__ - INFO - Total factors ingested/updated: 0
+2025-11-19 13:46:28,779 - __main__ - INFO - ============================================================

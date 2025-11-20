@@ -7,6 +7,7 @@ from datetime import date
 from backend.models import Factor, FactorReturn
 
 
+
 def test_compare_factors(client, db_session):
     """Test factor comparison endpoint"""
     # Create two factors with returns
@@ -14,13 +15,17 @@ def test_compare_factors(client, db_session):
         code="test_factor_1",
         name="Test Factor 1",
         region="US",
-        frequency="Monthly"
+        frequency="Monthly",
+        first_date=date(2020, 1, 1),
+        last_date=date(2020, 12, 31)
     )
     factor2 = Factor(
         code="test_factor_2",
         name="Test Factor 2",
         region="US",
-        frequency="Monthly"
+        frequency="Monthly",
+        first_date=date(2020, 1, 1),
+        last_date=date(2020, 12, 31)
     )
     db_session.add(factor1)
     db_session.add(factor2)

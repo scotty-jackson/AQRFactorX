@@ -1,0 +1,1396 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.0.0, pluggy-1.6.0 -- C:\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: S:\Projects\AQRFactorX\backend
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.10.0, Faker-38.2.0, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 19 items
+
+tests/test_api_analytics.py::test_compare_factors FAILED                 [  5%]
+tests/test_api_analytics.py::test_compare_factors_minimum_requirement PASSED [ 10%]
+tests/test_api_analytics.py::test_correlation_matrix PASSED              [ 15%]
+tests/test_api_analytics.py::test_top_factors PASSED                     [ 21%]
+tests/test_api_factors.py::test_health_check PASSED                      [ 26%]
+tests/test_api_factors.py::test_list_factors_empty PASSED                [ 31%]
+tests/test_api_factors.py::test_list_factors FAILED                      [ 36%]
+tests/test_api_factors.py::test_get_factor_by_id FAILED                  [ 42%]
+tests/test_api_factors.py::test_get_factor_not_found PASSED              [ 47%]
+tests/test_api_factors.py::test_filter_factors_by_region FAILED          [ 52%]
+tests/test_api_factors.py::test_search_factors FAILED                    [ 57%]
+tests/test_api_factors.py::test_get_factor_timeseries FAILED             [ 63%]
+tests/test_api_factors.py::test_get_factor_statistics FAILED             [ 68%]
+tests/test_api_factors.py::test_pagination FAILED                        [ 73%]
+tests/test_models.py::test_create_factor_group PASSED                    [ 78%]
+tests/test_models.py::test_create_factor PASSED                          [ 84%]
+tests/test_models.py::test_factor_with_group PASSED                      [ 89%]
+tests/test_models.py::test_factor_returns PASSED                         [ 94%]
+tests/test_models.py::test_factor_return_unique_constraint PASSED        [100%]
+
+================================== FAILURES ===================================
+____________________________ test_compare_factors _____________________________
+
+client = <starlette.testclient.TestClient object at 0x0000018DB3359550>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB3359010>
+
+    def test_compare_factors(client, db_session):
+        """Test factor comparison endpoint"""
+        # Create two factors with returns
+        factor1 = Factor(
+            code="test_factor_1",
+            name="Test Factor 1",
+            region="US",
+            frequency="Monthly"
+        )
+        factor2 = Factor(
+            code="test_factor_2",
+            name="Test Factor 2",
+            region="US",
+            frequency="Monthly"
+        )
+        db_session.add(factor1)
+        db_session.add(factor2)
+        db_session.commit()
+        db_session.refresh(factor1)
+        db_session.refresh(factor2)
+    
+        # Add returns
+        for i in range(1, 6):
+            db_session.add(FactorReturn(
+                factor_id=factor1.id,
+                date=date(2020, i, 1),
+                return_value=0.01
+            ))
+            db_session.add(FactorReturn(
+                factor_id=factor2.id,
+                date=date(2020, i, 1),
+                return_value=0.02
+            ))
+        db_session.commit()
+    
+>       response = client.get(
+            f"/api/analytics/comparison?factor_ids={factor1.id}&factor_ids={factor2.id}"
+        )
+
+tests\test_api_analytics.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\testclient.py:479: in get
+    return super().get(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:1053: in get
+    return self.request(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\testclient.py:451: in request
+    return super().request(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\testclient.py:354: in handle_request
+    raise exc
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\testclient.py:351: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\anyio\from_thread.py:291: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python313\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python313\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\anyio\from_thread.py:222: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\applications.py:1134: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\applications.py:113: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\cors.py:85: in __call__
+    await self.app(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py:716: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py:736: in app
+    await route.handle(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\routing.py:290: in handle
+    await self.app(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py:125: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py:111: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py:391: in app
+    raw_response = await run_endpoint_function(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\fastapi\routing.py:292: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\starlette\concurrency.py:38: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\anyio\to_thread.py:56: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\anyio\_backends\_asyncio.py:2476: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\anyio\_backends\_asyncio.py:967: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+factor_ids = [1, 2], start_date = None, end_date = None
+db = <sqlalchemy.orm.session.Session object at 0x0000018DB3359010>
+
+    @router.get("/comparison", response_model=schemas.ComparisonResponse)
+    def compare_factors(
+        factor_ids: List[int] = Query(..., description="List of factor IDs to compare"),
+        start_date: Optional[date] = Query(None, description="Start date for comparison"),
+        end_date: Optional[date] = Query(None, description="End date for comparison"),
+        db: Session = Depends(get_db)
+    ):
+        """
+        Compare multiple factors over a common time period
+        """
+        if len(factor_ids) < 2:
+            raise HTTPException(status_code=400, detail="At least 2 factors required for comparison")
+    
+        if len(factor_ids) > 10:
+            raise HTTPException(status_code=400, detail="Maximum 10 factors allowed for comparison")
+    
+        # Verify all factors exist
+        factors = db.query(Factor).filter(Factor.id.in_(factor_ids)).all()
+    
+        if len(factors) != len(factor_ids):
+            raise HTTPException(status_code=404, detail="One or more factors not found")
+    
+        # Get returns for all factors
+        comparison_data = []
+    
+        # Determine common date range if not specified
+        if not start_date or not end_date:
+            # Find overlapping date range
+            for factor in factors:
+                if not start_date or (factor.first_date and factor.first_date > start_date):
+                    start_date = factor.first_date
+                if not end_date or (factor.last_date and factor.last_date < end_date):
+                    end_date = factor.last_date
+    
+        for factor in factors:
+            # Get returns for this factor
+            query = db.query(FactorReturn).filter(FactorReturn.factor_id == factor.id)
+    
+            if start_date:
+                query = query.filter(FactorReturn.date >= start_date)
+    
+            if end_date:
+                query = query.filter(FactorReturn.date <= end_date)
+    
+            returns = query.order_by(FactorReturn.date).all()
+    
+            if not returns:
+                continue
+    
+            # Calculate cumulative returns
+            data_points = []
+            cumulative_value = 1.0
+    
+            for ret in returns:
+                cumulative_value *= (1 + ret.return_value)
+                cumulative_return = cumulative_value - 1
+    
+                data_points.append(
+                    schemas.TimeSeriesPoint(
+                        date=ret.date,
+                        return_value=ret.return_value,
+                        cumulative_return=cumulative_return
+                    )
+                )
+    
+            comparison_data.append(
+                schemas.ComparisonSeriesData(
+                    factor_id=factor.id,
+                    factor_code=factor.code,
+                    factor_name=factor.name,
+                    data=data_points
+                )
+            )
+    
+        if not comparison_data:
+            raise HTTPException(status_code=404, detail="No data found for the specified factors and date range")
+    
+>       response = schemas.ComparisonResponse(
+            start_date=start_date,
+            end_date=end_date,
+            factors=comparison_data
+        )
+E       pydantic_core._pydantic_core.ValidationError: 2 validation errors for ComparisonResponse
+E       start_date
+E         Input should be a valid date [type=date_type, input_value=None, input_type=NoneType]
+E           For further information visit https://errors.pydantic.dev/2.12/v/date_type
+E       end_date
+E         Input should be a valid date [type=date_type, input_value=None, input_type=NoneType]
+E           For further information visit https://errors.pydantic.dev/2.12/v/date_type
+
+api\analytics.py:96: ValidationError
+______________________________ test_list_factors ______________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB34E5E50>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB3422900>, [])
+kw = {'cache_hit': <CacheStats.CACHE_MISS: 1>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB3FFC3B0>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB33CC490>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB3443240>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_list_factors(client, db_session, sample_factor_data):
+        """Test listing factors"""
+        # Create a test factor
+        factor = Factor(**sample_factor_data)
+        db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+____________________________ test_get_factor_by_id ____________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB34E6650>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB3422900>, [])
+kw = {'cache_hit': <CacheStats.CACHE_HIT: 0>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB45C6930>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB3443460>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB3443AC0>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_get_factor_by_id(client, db_session, sample_factor_data):
+        """Test getting a specific factor"""
+        factor = Factor(**sample_factor_data)
+        db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+________________________ test_filter_factors_by_region ________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB359D6D0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB3FAA950>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_eu', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB3FAA950>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_eu', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB359DB80>, [])
+kw = {'cache_hit': <CacheStats.CACHE_MISS: 1>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB45B6DB0>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB3599BF0>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB3FA8850>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_filter_factors_by_region(client, db_session, sample_factor_data):
+        """Test filtering factors by region"""
+        # Create factors in different regions
+        factor_us = Factor(**sample_factor_data)
+        db_session.add(factor_us)
+    
+        factor_europe = Factor(**{**sample_factor_data, "code": "test_qmj_eu", "region": "Europe"})
+        db_session.add(factor_europe)
+>       db_session.commit()
+
+tests\test_api_factors.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1143: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_eu', 'annualized_return': 0.08, 'description': 'Test fact ... (89 characters truncated) ... ': 'Europe', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+_____________________________ test_search_factors _____________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB45066D0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB3422900>, [])
+kw = {'cache_hit': <CacheStats.CACHE_HIT: 0>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB457B1D0>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB359A7A0>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB359E030>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_search_factors(client, db_session, sample_factor_data):
+        """Test searching factors"""
+        factor = Factor(**sample_factor_data)
+        db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+_________________________ test_get_factor_timeseries __________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB4504AD0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB3422900>, [])
+kw = {'cache_hit': <CacheStats.CACHE_HIT: 0>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB457B950>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB3599040>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB3AC68A0>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_get_factor_timeseries(client, db_session, sample_factor_data):
+        """Test getting factor time series"""
+        # Create factor with returns
+        factor = Factor(**sample_factor_data)
+        db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+_________________________ test_get_factor_statistics __________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB3EF6B30>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB34E7250>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}], <sqlalchemy.sql.dml.Insert object at 0x0000018DB3422900>, [])
+kw = {'cache_hit': <CacheStats.CACHE_HIT: 0>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB45021B0>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB359B240>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB359F7A0>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_get_factor_statistics(client, db_session, sample_factor_data):
+        """Test getting factor statistics"""
+        factor = Factor(**sample_factor_data)
+        db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+_______________________________ test_pagination _______________________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000018DB3EF50F0>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x0000018DB326BA10>
+constructor = <bound method DefaultExecutionContext._init_compiled of <class 'sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext'>>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB3FAA950>
+parameters = [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_0', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_1', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_2', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_3', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_4', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_5', ...}, ...]
+execution_options = immutabledict({'compiled_cache': <sqlalchemy.util._collections.LRUCache object at 0x0000018DB346E980>})
+args = (<sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000018DB3FAA950>, [{'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_0', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_1', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_2', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_3', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_4', ...}, {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_factor_5', ...}, ...], <sqlalchemy.sql.dml.Insert object at 0x0000018DB4506C10>, [])
+kw = {'cache_hit': <CacheStats.CACHE_HIT: 0>}, yp = None
+conn = <sqlalchemy.pool.base._ConnectionFairy object at 0x0000018DB452DE50>
+
+    def _execute_context(
+        self,
+        dialect: Dialect,
+        constructor: Callable[..., ExecutionContext],
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+        execution_options: _ExecuteOptions,
+        *args: Any,
+        **kw: Any,
+    ) -> CursorResult[Any]:
+        """Create an :class:`.ExecutionContext` and execute, returning
+        a :class:`_engine.CursorResult`."""
+    
+        if execution_options:
+            yp = execution_options.get("yield_per", None)
+            if yp:
+                execution_options = execution_options.union(
+                    {"stream_results": True, "max_row_buffer": yp}
+                )
+        try:
+            conn = self._dbapi_connection
+            if conn is None:
+                conn = self._revalidate_connection()
+    
+>           context = constructor(
+                dialect, self, conn, execution_options, *args, **kw
+            )
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           TypeError: SQLite Date type only accepts Python date objects as input.
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: TypeError
+
+The above exception was the direct cause of the following exception:
+
+client = <starlette.testclient.TestClient object at 0x0000018DB359AAD0>
+db_session = <sqlalchemy.orm.session.Session object at 0x0000018DB359D6D0>
+sample_factor_data = {'annualized_return': 0.08, 'annualized_volatility': 0.15, 'asset_class': 'Equity', 'code': 'test_qmj_us', ...}
+
+    def test_pagination(client, db_session, sample_factor_data):
+        """Test factor list pagination"""
+        # Create multiple factors
+        for i in range(15):
+            factor_data = {**sample_factor_data, "code": f"test_factor_{i}"}
+            factor = Factor(**factor_data)
+            db_session.add(factor)
+>       db_session.commit()
+
+tests\test_api_factors.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2030: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1311: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:1286: in _prepare_impl
+    self.session.flush()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4331: in flush
+    self._flush(objects)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\langhelpers.py:224: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:4427: in _flush
+    flush_context.execute()
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\persistence.py:1143: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:526: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1821: in _execute_context
+    self._handle_dbapi_exception(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1815: in _execute_context
+    context = constructor(
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:1493: in _init_compiled
+    flattened_processors[key](compiled_params[key])
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+value = '2020-01-01'
+
+    def process(value):
+        if value is None:
+            return None
+        elif isinstance(value, datetime_date):
+            return format_ % {
+                "year": value.year,
+                "month": value.month,
+                "day": value.day,
+            }
+        else:
+>           raise TypeError(
+                "SQLite Date type only accepts Python "
+                "date objects as input."
+            )
+E           sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+E           [SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+E           [parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_0', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_1', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_2', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_3', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_4', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_5', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_6', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_7', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_8', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_9', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_10', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_11', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_12', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_13', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_14', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\dialects\sqlite\base.py:1287: StatementError
+-------------------------- Captured stderr teardown ---------------------------
+S:\Projects\AQRFactorX\backend\tests\conftest.py:45: SAWarning: transaction already deassociated from connection
+  transaction.rollback()
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+__init__.py                       0      0   100%
+api\__init__.py                   0      0   100%
+api\advanced_analytics.py       168    118    30%   74-141, 170-269, 297-346
+api\analytics.py                130     29    78%   33, 39, 58, 61, 66, 94, 102, 116, 119, 125, 136, 139, 149, 158, 200, 202, 204, 206, 208, 214, 226, 233, 243-248, 292-293
+api\export.py                    66     50    24%   27-56, 72-126, 139-174
+api\factors.py                  119     86    28%   37, 40, 43, 46, 49-50, 79, 94-141, 155-214, 228-300
+api\monitoring.py                37     23    38%   19-49, 55-76, 94
+cache.py                         54     54     0%   4-90
+db.py                            15      6    60%   28-32, 40-41
+etl\__init__.py                   0      0   100%
+etl\ingest_aqr_factors.py       213    213     0%   14-558
+main.py                          31      7    77%   41, 60, 77, 91, 100-102
+models.py                        46      0   100%
+schemas.py                      135      0   100%
+tests\__init__.py                 0      0   100%
+tests\conftest.py                36      0   100%
+tests\test_api_analytics.py      52      3    94%   48-50
+tests\test_api_factors.py        96     50    48%   31-36, 44-50, 70-74, 83-87, 96-113, 121-137, 150-157
+tests\test_models.py             49      0   100%
+-----------------------------------------------------------
+TOTAL                          1247    639    49%
+Coverage HTML written to dir htmlcov
+=========================== short test summary info ===========================
+FAILED tests/test_api_analytics.py::test_compare_factors - pydantic_core._pydantic_core.ValidationError: 2 validation errors for ComparisonResponse
+start_date
+  Input should be a valid date [type=date_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/date_type
+end_date
+  Input should be a valid date [type=date_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/date_type
+FAILED tests/test_api_factors.py::test_list_factors - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_get_factor_by_id - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_filter_factors_by_region - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_eu', 'annualized_return': 0.08, 'description': 'Test fact ... (89 characters truncated) ... ': 'Europe', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_search_factors - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_get_factor_timeseries - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_get_factor_statistics - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_qmj_us', 'annualized_return': 0.08, 'description': 'Test fact ... (85 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+FAILED tests/test_api_factors.py::test_pagination - sqlalchemy.exc.StatementError: (builtins.TypeError) SQLite Date type only accepts Python date objects as input.
+[SQL: INSERT INTO factor (code, name, provider, region, asset_class, frequency, description, first_date, last_date, group_id, total_return, annualized_return, annualized_volatility, max_drawdown, sharpe_ratio, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id]
+C:\Users\Scott\AppData\Roaming\Python\Python313\site-packages\_pytest\unraisableexception.py:33: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x0000018DB33987C0>
+  gc.collect()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+[parameters: [{'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_0', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_1', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_2', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_3', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_4', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_5', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_6', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_7', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_8', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_9', 'annualized_return': 0.08, 'description': 'Test fa ... (87 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_10', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_11', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_12', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_13', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}, {'first_date': '2020-01-01', 'frequency': 'Monthly', 'sharpe_ratio': 0.53, 'code': 'test_factor_14', 'annualized_return': 0.08, 'description': 'Test f ... (88 characters truncated) ... gion': 'US', 'max_drawdown': -0.12, 'asset_class': 'Equity', 'annualized_volatility': 0.15, 'provider': 'AQR', 'group_id': None, 'total_return': None}]]
+======================== 8 failed, 11 passed in 3.23s =========================
